@@ -1,6 +1,7 @@
 #!/usr/bin/python
-# smart fan
-# Rev1
+# smart window fan - to be used with the tp-link hs100 power plug
+# Rev1 By Granpino
+#####################
 import sys, pygame
 from pygame.locals import *
 import time
@@ -30,7 +31,7 @@ sensor = Adafruit_DHT.DHT22
 #set size of the screen
 size = width, height = 650, 410  #to fit in a 720x480 screen
 
-#screen = pygame.display.set_mode(size) #,pygame.FULLSCREEN)
+#screen = pygame.display.set_mode(size) # use this for troubleshooting
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 
 #define colors
@@ -259,7 +260,7 @@ while True:
         localT = (int(localT)*1.8+32)
         localH = (int(localH))
 
-        for x in range(8): # update every 30 seconds
+        for x in range(8): # update every xx seconds
 #            print('second loop')
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
