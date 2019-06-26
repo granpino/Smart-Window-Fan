@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# smart window fan - to be used with the tp-link hs100 power plug
-# Rev1 By Granpino
-#####################
+# smart fan
+# Rev1
 import sys, pygame
 from pygame.locals import *
 import time
@@ -17,19 +16,19 @@ pygame.init()
 
 disp_units = "imperial"
 #disp_units = "metric"
-#zip_code = 'USIN0286'
 zip_code = "60617"
 ## dh100 smart plug IP
-hs100IP = '192.168.43.82'
+hs100IP = '192.168.0.198'
 HS100 = False
 plug_status = '??'
-degSymF = unichr(0x2109)         # Unicode for DegreeF
-degSym = unichr(0x00B0)          #unicode for degree
-pin = '4'
+degSymF = unichr(0x2109)         # Unicode for Degree F
+degSym = unichr(0x00B0)          #unicode for degree symbol
+pin = '4' 
 sensor = Adafruit_DHT.DHT22
+inhibit = False
 
 #set size of the screen
-size = width, height = 650, 410  #to fit in a 720x480 screen
+size = width, height = 650, 410  #To fit in a 720x480 screen
 
 #screen = pygame.display.set_mode(size) # use this for troubleshooting
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
@@ -42,6 +41,7 @@ white = 255, 235, 235
 lblue = 75, 140, 200
 green = 0, 255, 0
 silver = 192, 192, 192
+yellow = 255, 255, 0
 
 #other
 wLastUpdate = ''
@@ -159,7 +159,7 @@ def update_weather():
 	print "ValueError -> Weather Error"
 
        # check for temperature and control the smart plug 
-    if float(localT) >= set_point and float(temp) < float(localT) and HS100 == False:
+    if float(localT) >= set_point and float(temp) < float(localT) and HS100 == False and inhibit == False:
         subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100IP, "on"]) 
 
         print('Plug is ON')
@@ -167,23 +167,22 @@ def update_weather():
 
     if float(temp) > float(localT) and HS100 == True:
         subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100IP, "off"]) 
-
         HS100 = False
         print(HS100)
-#    else:
-        print (plug_status)
+        print(plug_status)
+
     if float(localT) < set_point and HS100 == True:
         subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100IP, "off"]) 
-        print('off')
+        print('plug is off')
         HS100 = False
-    print ('end of checking')
+ 
 #============================================
 
 def refresh_screen():
 #set up the fixed items on the menu
     global temp
     global localT
-    
+
     current_time = datetime.datetime.now().strftime('%I:%M:%S')
     time_font=pygame.font.Font(None,36)
     time_label = time_font.render(current_time, 1, (silver)) 
@@ -221,7 +220,7 @@ def refresh_screen():
 	# Show degree F symbol 
     degreeF = d_font.render( degSymF, True, cyan )
 
-	#draw the main elements on the screen 
+    #put the main elements on the screen 
 
     pygame.draw.rect(screen, blue, (540, 70, 40, 40),0)
     pygame.draw.rect(screen, blue, (540, 280, 40, 40),0)
@@ -230,6 +229,9 @@ def refresh_screen():
         pygame.draw.circle(screen, green, [560, 375], 10, 0)
     else:
         pygame.draw.circle(screen, black, [560, 375], 10, 0)
+    if inhibit == True:
+        pygame.draw.circle(screen, yellow, [560, 375], 10, 0)
+
 #    screen.blit(cpu_label,(15, 365)) #cputemp
     screen.blit(setP,(525, 180))
     screen.blit(SetAt, (525,145))
@@ -237,12 +239,12 @@ def refresh_screen():
     screen.blit(locLbl, (15, 365))
     screen.blit(status_lbl, (480, 365))
     screen.blit(outside, (50, 145))
-    screen.blit(outsideT, (50, 180) )
+    screen.blit(outsideT, (50, 180))
     screen.blit(outsideH, (60, 235))
     screen.blit(degree, (110, 170))
     screen.blit(degree, (580, 170))
-    screen.blit( insideT, (220, 125) )
-    screen.blit( degreeF, (420, 110) )
+    screen.blit(insideT, (220, 125))
+    screen.blit(degreeF, (420, 110))
     screen.blit(localHfnt, (260, 235))
     screen.blit(inside, (290, 110))
     screen.blit(time_label, (495, 10))
@@ -252,16 +254,23 @@ def refresh_screen():
     pygame.display.flip()
 
 while True:
-
-    update_weather()
+#    print('first loop')
+    times = datetime.datetime.now().strftime("%H:%M") #inhibit time
+    update_weather() # update indoor and outdoor
     for y in range(5):
-#        print('first loop')
+#        print('second loop')
         localH, localT = Adafruit_DHT.read_retry(sensor, pin)
-        localT = (int(localT)*1.8+32)
+        localT = (int(localT)*1.8+32) # from Deg C to Deg F
         localH = (int(localH))
 
-        for x in range(8): # update every xx seconds
-#            print('second loop')
+# inhibit will stop the fan from working on the early hours of the morning
+# when the temperature begins to rise
+        if times >= "06:00" and times < "10:00":
+            inhibit = True
+        else:
+            inhibit = False
+
+        for x in range(8): # scan mouse every 1 seconds
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     click_pos = pygame.mouse.get_pos()
@@ -276,6 +285,6 @@ while True:
                         sys.exit()
             pygame.time.wait(300)
             refresh_screen()
-    
+
 pi.stop()
 pygame.quit()
