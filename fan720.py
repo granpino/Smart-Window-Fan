@@ -48,7 +48,7 @@ wLastUpdate = ''
 set_point = 70
 temp = 0
 #raspberry IP
-IPAddr = socket.gethostbyname('raspberrypi.local')
+#IPAddr = socket.gethostbyname('raspberrypi.local')
 
 localH = 0
 localT = 0
