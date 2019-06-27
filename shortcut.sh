@@ -13,8 +13,8 @@ cat <<EOF > fan.desktop
 [Desktop Entry]
 Name=FAN
 Type=Application
-Exec=lxterminal -t "SMART FAN" --working-directory=/home/pi/smart-window-fan/ -e ./fan.sh
-Icon=/home/pi/smart-window-fan/icon.png
+Exec=lxterminal -t "SMART FAN" --working-directory=/home/pi/Smart-Window-Fan/ -e ./fan.sh
+Icon=/home/pi/Smart-Window-Fan/icon.png
 Comment=test
 Terminal=true
 
