@@ -1,6 +1,6 @@
 #!/usr/bin/python
-# smart fan
-# Rev1
+# smart fan by Granpino. June 2019
+# Rev1.1
 import sys, pygame
 from pygame.locals import *
 import time
@@ -18,7 +18,8 @@ disp_units = "imperial"
 #disp_units = "metric"
 zip_code = "60617"
 ## dh100 smart plug IP
-hs100IP = '192.168.0.198'
+hs100_1IP = '192.168.0.198'
+hs100_2IP = '192.168.0.149'
 HS100 = False
 plug_status = '??'
 degSymF = unichr(0x2109)         # Unicode for Degree F
@@ -82,9 +83,10 @@ def button(number):
     if number == 0:    # exiting
 	screen.fill(black)
 	font=pygame.font.Font(None,30)
-        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100IP, "off"]) 
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_1IP, "off"]) 
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_2IP, "off"])
 	label=font.render("Turning HS100 OFF! ", 1, (white))
-        screen.blit(label,(40,150))
+        screen.blit(label,(40,170))
 	pygame.display.flip()
 	time.sleep(2)
 	pygame.quit()
@@ -160,19 +162,21 @@ def update_weather():
 
        # check for temperature and control the smart plug 
     if float(localT) >= set_point and float(temp) < float(localT) and HS100 == False and inhibit == False:
-        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100IP, "on"]) 
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_1IP, "on"]) 
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_2IP, "on"])
 
         print('Plug is ON')
         HS100 = True
 
     if float(temp) > float(localT) and HS100 == True:
-        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100IP, "off"]) 
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_1IP, "off"]) 
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_2IP, "off"])
         HS100 = False
         print(HS100)
         print(plug_status)
 
     if float(localT) < set_point and HS100 == True:
-        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100IP, "off"]) 
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_1IP, "off"]) 
         print('plug is off')
         HS100 = False
  
@@ -187,7 +191,7 @@ def refresh_screen():
     time_font=pygame.font.Font(None,36)
     time_label = time_font.render(current_time, 1, (silver)) 
 #    IP_label = time_font.render(IPAddr, 1, (silver))
-    IP_label = time_font.render(hs100IP, 1, (silver))
+    IP_label = time_font.render(hs100_1IP, 1, (silver))
 
     sfont = pygame.font.SysFont('sans', 20, bold=0)
     d_font = pygame.font.SysFont('sans', 30, bold=1)
@@ -199,6 +203,7 @@ def refresh_screen():
  #   cpu_label = cpu_font.render('Cpu ' + cpu, 1, (silver))
     skin = pygame.image.load("720skin.jpg")
     status_lbl = sfont.render('HS100', 1, (white))
+    x_lbl = sfont.render('X', 1, (white))
     setP = mfont.render( str(set_point), 1, (cyan))
 
     screen.blit(skin,(0,0))
@@ -225,6 +230,7 @@ def refresh_screen():
     pygame.draw.rect(screen, blue, (540, 70, 40, 40),0)
     pygame.draw.rect(screen, blue, (540, 280, 40, 40),0)
     pygame.draw.rect(screen, lblue, (599, 1, 40, 40), 0)
+
     if HS100 == True:
         pygame.draw.circle(screen, green, [560, 375], 10, 0)
     else:
@@ -248,6 +254,11 @@ def refresh_screen():
     screen.blit(localHfnt, (260, 235))
     screen.blit(inside, (290, 110))
     screen.blit(time_label, (495, 10))
+    screen.blit(x_lbl, (613, 11))
+    pygame.draw.line(screen, white,(550,90),(560,80)) #arrows
+    pygame.draw.line(screen, white,(560,80),(570,90))
+    pygame.draw.line(screen, white,(550,300),(560,310))
+    pygame.draw.line(screen, white,(560,310),(570,300))
 
     time.sleep(.1)
 
@@ -257,7 +268,7 @@ while True:
 #    print('first loop')
     times = datetime.datetime.now().strftime("%H:%M") #inhibit time
     update_weather() # update indoor and outdoor
-    for y in range(5):
+    for y in range(5): # scan every 3 sec
 #        print('second loop')
         localH, localT = Adafruit_DHT.read_retry(sensor, pin)
         localT = (int(localT)*1.8+32) # from Deg C to Deg F
@@ -265,12 +276,12 @@ while True:
 
 # inhibit will stop the fan from working on the early hours of the morning
 # when the temperature begins to rise
-        if times >= "06:00" and times < "10:00":
+        if times >= "06:00" and times < "09:00":
             inhibit = True
         else:
             inhibit = False
 
-        for x in range(8): # scan mouse every 1 seconds
+        for x in range(15): # scan mouse every 0.2 seconds
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     click_pos = pygame.mouse.get_pos()
@@ -283,7 +294,7 @@ while True:
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE: # ESC key will kill it
                         sys.exit()
-            pygame.time.wait(300)
+            pygame.time.wait(100)
             refresh_screen()
 
 pi.stop()
