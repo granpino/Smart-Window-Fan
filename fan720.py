@@ -177,7 +177,8 @@ def update_weather():
 
     if float(localT) < set_point and HS100 == True:
         subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_1IP, "off"]) 
-        print('plug is off')
+        subprocess.Popen(["sudo", "./hs100.sh", "-i", hs100_2IP, "off"])
+	print('plug is off')
         HS100 = False
  
 #============================================
