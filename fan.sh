@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sudo python fan720.py
+sudo python smartfan13.py
