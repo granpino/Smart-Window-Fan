@@ -14,7 +14,7 @@ import requests
 pygame.init()
 
 settings = {
-    'api_key':'91118451a27126532b45133ecda400a7',
+    'api_key':'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
     'zip_code':'44100',
     'country_code':'MX',
     'temp_unit':'metric'} #unit can be metric, imperial, or kelvin
