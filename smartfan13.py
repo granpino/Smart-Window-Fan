@@ -1,6 +1,6 @@
 ##
 #!/usr/bin/python
-# smart fan by Granpino. June 2019
+# smart fan by Granpino. June 2019, May 2020.
 # Rev1.3
 import sys, pygame
 from pygame.locals import *
