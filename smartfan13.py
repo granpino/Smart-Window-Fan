@@ -248,7 +248,7 @@ def refresh_screen():
     pygame.display.flip()
 
 while True:
-    # get the weather every 110 sec
+    # get the weather every 180 sec
     #detect inhibit time
     update_weather() # update indoor and outdoor
     sunRise = time.localtime(sunrise) # convert from unix time  
@@ -271,7 +271,7 @@ while True:
 #	    print ("sunrise = " + sunRISE)
 #	    print("time = " + current_time)
 
-        for x in range(30): # scan mouse every 0.5 seconds
+        for x in range(200): # scan mouse every 0.5 seconds
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     click_pos = pygame.mouse.get_pos()
