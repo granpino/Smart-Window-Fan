@@ -248,7 +248,7 @@ def refresh_screen():
     pygame.display.flip()
 
 while True:
-    # get the weather every 180 sec
+    # get the weather every 5 minutes.
     #detect inhibit time
     update_weather() # update indoor and outdoor
     sunRise = time.localtime(sunrise) # convert from unix time  
